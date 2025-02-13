@@ -18,8 +18,6 @@ from langgraph.graph import StateGraph, END
 
 from dotenv import load_dotenv
 
-from agents.train_vanna import train
-
 load_dotenv(".env")
 
 
@@ -32,9 +30,8 @@ class DataAnalystVanna(ChromaDB_VectorStore, OpenAI_Chat):
         OpenAI_Chat.__init__(self, client=azure_openai_client, config=config)
 
 
-vn = DataAnalystVanna(config={"model": "gpt-4o-mini"})
+vn = DataAnalystVanna(config={"model": "gpt-4o-mini", "client": "persistent", "path": "./vanna-db"})
 vn.connect_to_sqlite("../data/sales-and-customer-database.db")
-train(vn)
 training_data = vn.get_training_data()
 print("training_data", training_data)
 
