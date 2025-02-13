@@ -5,7 +5,8 @@ from langchain_openai import AzureChatOpenAI
 from openai import AzureOpenAI
 from dotenv import load_dotenv
 
-load_dotenv(".env")
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+load_dotenv(dotenv_path)
 
 
 def _build_azure_openai() -> AzureChatOpenAI:
