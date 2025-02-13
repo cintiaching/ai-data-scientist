@@ -1,9 +1,9 @@
 import glob
 import os
 
-import csv
 import sqlite3
 import kagglehub
+import pandas as pd
 
 from dotenv import load_dotenv
 
@@ -20,27 +20,33 @@ conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
 
+def infer_datatype(series):
+    """Infer the data type of a pandas Series."""
+    if pd.api.types.is_integer_dtype(series):
+        return 'INTEGER'
+    elif pd.api.types.is_float_dtype(series):
+        return 'REAL'
+    elif pd.api.types.is_bool_dtype(series):
+        return 'BOOLEAN'
+    else:
+        return 'TEXT'
+
+
 def import_csv_to_db(csv_file, table_name):
-    # Open the CSV file
-    with open(csv_file, 'r') as file:
-        # Create a CSV reader
-        reader = csv.reader(file)
-
-        # Read the header (first row) to create the table
-        headers = next(reader)
-
-        # Create a table with the appropriate schema
-        cursor.execute(f'CREATE TABLE IF NOT EXISTS {table_name} ({", ".join(headers)});')
-
-        # Insert data into the table
-        for row in reader:
-            cursor.execute(f'INSERT INTO {table_name} ({", ".join(headers)}) VALUES ({", ".join(["?"] * len(row))});',
-                           row)
+    df = pd.read_csv(csv_file)
+    column_types = {col: infer_datatype(df[col]) for col in df.columns}
+    # Create table with inferred types
+    columns_with_types = ', '.join(f"{col} {dtype}" for col, dtype in column_types.items())
+    create_table_query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_with_types});"
+    cursor.execute(create_table_query)
+    # Insert data into the table
+    df.to_sql(table_name, conn, if_exists='append', index=False)
 
 
 # import data to db
-csv_files = glob.glob("data/*.csv")
-for csv_file, table_name in csv_files:
+csv_files = glob.glob("data/**/*.csv", recursive=True)
+for csv_file in csv_files:
+    table_name = os.path.basename(csv_file).split(".")[0]
     import_csv_to_db(csv_file, table_name)
 
 conn.commit()
