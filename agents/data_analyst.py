@@ -18,7 +18,7 @@ from langgraph.graph import StateGraph, END
 
 from dotenv import load_dotenv
 
-from train import train
+from agents.train_vanna import train
 
 load_dotenv(".env")
 
