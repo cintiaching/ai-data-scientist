@@ -28,3 +28,16 @@ print(result["messages"][-1].content)
 
 print("full answer")
 print(result["messages"])
+
+# example usage of slides_generator_agent
+result = ai_data_scientist.invoke({
+    "messages": [
+        {
+            "role": "user",
+            "content": "Please create slides about how the business is doing "
+                       "and what is the predicted key metric for sales next year?"
+        }
+    ]
+})
+print("ANSWER: ")
+print(result["messages"][-1].content)
