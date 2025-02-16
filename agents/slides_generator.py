@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
+output_dir = os.getenv("OUTPUT_DIRECTORY", ".")
+os.makedirs(output_dir, exist_ok=True)
+
 model = build_llm()
 
 
@@ -20,7 +23,7 @@ def generate_python_pptx_code(user_input: str) -> str:
 Extract key insights and generate relevant charts based on the past conversation. 
 Finally, create a well-structured presentation that includes these charts and any necessary images, ensuring 
 that the formatting is professional and visually appealing.
-Afterward, save the presentation in pptx format in {os.getenv("OUTPUT_DIRECTORY", ".")} directory, 
+Afterward, save the presentation in pptx format in {output_dir} directory, 
 give the file a relevant name.
 """
     code_gen_prompt = ChatPromptTemplate.from_messages(
