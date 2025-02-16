@@ -9,6 +9,7 @@ from agents.slides_generator import create_slides_generator_agent
 
 def get_ai_data_scientist():
     model = build_llm()
+    # persistence
     checkpointer = InMemorySaver()
 
     # agents
