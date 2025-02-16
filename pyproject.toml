@@ -13,6 +13,7 @@ dependencies = [
     "langgraph>=0.2.71",
     "langgraph-supervisor>=0.0.2",
     "python-dotenv>=1.0.1",
+    "python-pptx>=1.0.2",
     "scikit-learn>=1.6.1", # [optional] for example code execution from coder
     "vanna>=0.7.6",
 ]
