@@ -9,7 +9,6 @@ from langchain_core.messages import BaseMessage, ToolMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 
-from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel, Field
 
 from agents.llm import build_llm
@@ -50,6 +49,7 @@ def python_repl_tool(
 @tool
 def generate_python_code(user_input: str) -> str:
     """Generate python code given user input."""
+    # TODO: fix prompt so that it is take in any data
     system_prompt = """You are a python expert. Please help to generate a code to answer the question. 
 Your response should ONLY be based on the given context and follow the response guidelines and format instructions. 
 You can access to SQLite database if you need to, connect using
@@ -81,10 +81,6 @@ The tables within the database:
     result = code_gen_chain.invoke({"messages": [("user", user_input)]})
     print("code generation result", result)
     return result.code
-    # {
-    #     "code": result.code,
-    #     "prefix": result.prefix
-    # }
 
 
 tools = [python_repl_tool, generate_python_code]
@@ -133,39 +129,13 @@ def should_continue(state: CoderState):
 
 
 def create_coder_agent():
-    # NOTE: THIS PERFORMS ARBITRARY CODE EXECUTION, WHICH CAN BE UNSAFE WHEN NOT SANDBOXED
-    # code_agent = create_react_agent(
-    #     model,
-    #     tools=[generate_python_code, python_repl_tool],
-    #     name="coder_agent",
-    #     prompt="You are a coder agent, please use generate_python_code tool to generate code given user's intent"
-    #            "And then use python_repl_tool to execute your code, and then return your result."
-    # )
-    # return code_agent
-    # Define a new graph
     workflow = StateGraph(CoderState)
-
-    # Define the two nodes we will cycle between
     workflow.add_node("agent", call_model)
     workflow.add_node("tools", tool_node)
-
-    # Set the entrypoint as `agent`
-    # This means that this node is the first one called
     workflow.set_entry_point("agent")
-
-    # We now add a conditional edge
     workflow.add_conditional_edges(
-        # First, we define the start node. We use `agent`.
-        # This means these are the edges taken after the `agent` node is called.
         "agent",
-        # Next, we pass in the function that will determine which node is called next.
         should_continue,
-        # Finally we pass in a mapping.
-        # The keys are strings, and the values are other nodes.
-        # END is a special node marking that the graph should finish.
-        # What will happen is we will call `should_continue`, and then the output of that
-        # will be matched against the keys in this mapping.
-        # Based on which one it matches, that node will then be called.
         {
             # If `tools`, then we call the tool node.
             "continue": "tools",
@@ -173,11 +143,6 @@ def create_coder_agent():
             "end": END,
         },
     )
-
-    # We now add a normal edge from `tools` to `agent`.
-    # This means that after `tools` is called, `agent` node is called next.
     workflow.add_edge("tools", "agent")
-
-    # Now we can compile and visualize our graph
     graph = workflow.compile(name="coder_agent")
     return graph
