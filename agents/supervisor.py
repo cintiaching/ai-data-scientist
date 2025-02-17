@@ -27,6 +27,7 @@ def get_ai_data_scientist():
             "For machine learning tasks or general coding task in python, use coder_agent. "
             "For creating powerpoint slides, use the slides_generator_agent. "
             "Think step by step and coordinate them to answer user's request. "
+            "Give final response to the user based on the output from the agent(s)."
         )
     )
 

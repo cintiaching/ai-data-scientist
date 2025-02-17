@@ -3,6 +3,7 @@ from agents.supervisor import get_ai_data_scientist
 ai_data_scientist = get_ai_data_scientist()
 
 # example usage of data_analyst_agent
+thread_id = 1
 result = ai_data_scientist.invoke({
     "messages": [
         {
@@ -10,7 +11,9 @@ result = ai_data_scientist.invoke({
             "content": "What are the total sales generated in this fy?"
         }
     ]
-})
+},
+    config={"thread_id": thread_id}
+)
 print("ANSWER: ")
 print(result["messages"][-1].content)
 
@@ -19,25 +22,25 @@ result = ai_data_scientist.invoke({
     "messages": [
         {
             "role": "user",
-            "content": "What will our sales be next quarter? Please use Regression models to predict"
+            "content": "Use Regression models to predict the total sales next year"
         }
     ]
-})
+},
+    config={"thread_id": thread_id}
+)
 print("ANSWER: ")
 print(result["messages"][-1].content)
-
-print("full answer")
-print(result["messages"])
 
 # example usage of slides_generator_agent
 result = ai_data_scientist.invoke({
     "messages": [
         {
             "role": "user",
-            "content": "Please create slides about how the business is doing "
-                       "and what is the predicted key metric for sales next year?"
+            "content": "Based on past conversation, create a slides to showcase the results"
         }
     ]
-})
+},
+    config={"thread_id": thread_id}
+)
 print("ANSWER: ")
 print(result["messages"][-1].content)
