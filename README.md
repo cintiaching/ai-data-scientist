@@ -65,8 +65,8 @@ You can modify the script to ingest data of your choice.
 ### Training
 
 Since it uses Vanna.ai, training is required for the agent to understand your data, similar to how a data scientist 
-learns about their dataset. For more details, check [Vanna.ai Training Documentation](https://vanna.ai/docs/train/). Modify `agents/train_vanna.py` 
-to incorporate your domain knowledge and use case.
+learns about their dataset. For more details, check [Vanna.ai Training Documentation](https://vanna.ai/docs/train/). 
+Modify `train.py` to incorporate your domain knowledge and use case.
 
 ### LLM Setup
 
