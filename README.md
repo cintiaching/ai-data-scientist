@@ -42,17 +42,11 @@ graph TD
     git clone https://github.com/cintiaching/ai-data-scientist
     cd ai-data-scientist
     ```
-2. Install dependency
-   
-    - Using uv
-
-      ```bash
-      uv pip install -r pyproject.toml
-      ```
-   - Or using pip
-      ```bash
-      pip install requirements.txt
-      ```
+2. Install dependency using uv
+    ```bash
+    uv sync
+    source .venv/bin/activate
+    ```
      
 3. Create `.env` file from `.env.example` and set the required environment variables.
 
@@ -78,12 +72,6 @@ Modify `train.py` to incorporate your domain knowledge and use case.
 
 ### Entry script
 
-- **Run Main or Local Host UI**:
-    ```bash
-    python main.py
-    ```
-  or
-  (UI to be created)
-    ```bash
-    streamlit run app.py
-    ```
+```bash
+python main.py
+```
