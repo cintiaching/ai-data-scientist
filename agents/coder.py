@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Annotated, TypedDict, Sequence
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -11,12 +12,16 @@ from langgraph.graph.message import add_messages
 
 from pydantic import BaseModel, Field
 
+from agents.data_analyst import DataAnalystVanna
 from agents.llm import build_llm
 
 model = build_llm()
 
 # This executes code locally, which can be unsafe
 repl = PythonREPL()
+
+vn = DataAnalystVanna(config={"model": "gpt-4o-mini", "client": "persistent", "path": "./vanna-db"})
+vn.connect_to_sqlite(os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db"))
 
 
 class CoderState(TypedDict):
@@ -49,24 +54,33 @@ def python_repl_tool(
 @tool
 def generate_python_code(user_input: str) -> str:
     """Generate python code given user input."""
-    # TODO: fix prompt so that it is take in any data
-    system_prompt = """You are a python expert. Please help to generate a code to answer the question. 
+    ddl_list = vn.get_related_ddl(user_input)
+    doc_list = vn.get_related_documentation(user_input)
+
+    system_prompt = f"""You are a python expert. Please help to generate a code to answer the question. 
 Your response should ONLY be based on the given context and follow the response guidelines and format instructions. 
 You can access to SQLite database if you need to, connect using
 ```python
 import sqlite3
 
-db_name = "data/sales-and-customer-database.db"
+db_name = "{os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db")}"
 
 con = sqlite3.connect(db_name)
 ```
-Do not delete or modify any data.
+Close the connection at the end of the code. Do not delete or modify any data.
 The tables within the database:
-\n===Tables \nCREATE TABLE sales_data (invoice_no TEXT, customer_id TEXT, category TEXT, quantity INTEGER, price REAL, invoice_date TEXT, shopping_mall TEXT)\n\nCREATE TABLE customer_data (customer_id TEXT, gender TEXT, age REAL, payment_method TEXT)\n\n
+===Tables 
+{"\n ".join(ddl_list)}
 
-\n===Additional Context \n\nThe invoice_date of sales_data is in dd-MM-yyyy format\n\nToday's date is 2025-02-13\n\nOur business defines financial year start with april to mar of each year\n
+===Additional Context 
+{"\n - ".join(doc_list)}
 
-\n===Response Guidelines \n1. If the provided context is sufficient, please generate a valid python without any explanations for the question. \n2. If the provided context is insufficient, please explain why it can't be generated. \n4. Please use the most relevant table(s). \n5. Ensure that the output python is executable, and free of syntax errors. \n
+===Response Guidelines
+1. If the provided context is sufficient, please generate a valid python without any explanations for the question.
+2. If the provided context is insufficient, please explain why it can't be generated.
+3. Please use the most relevant table(s). 
+4. Ensure that the output python is executable, and free of syntax errors.
+5. Do not print out raw data, or very long output.
     """
     code_gen_prompt = ChatPromptTemplate.from_messages(
         [
