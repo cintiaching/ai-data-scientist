@@ -33,6 +33,21 @@ graph TD
     classDef last fill: #3f3f3f, color: #ffffff
 ```
 
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	agent(agent)
+	tools(tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> agent;
+	tools --> agent;
+	agent -.-> tools;
+	agent -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
 ## Usage
 
 ### Setup
@@ -72,6 +87,12 @@ Modify `train.py` to incorporate your domain knowledge and use case.
 
 ### Entry script
 
+Example code:
 ```bash
 python main.py
+```
+
+To start the localhost UI created using streamlit, run
+```bash
+python -m streamlit run app.py
 ```
