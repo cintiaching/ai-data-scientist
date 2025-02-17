@@ -19,6 +19,7 @@ model = build_llm()
 
 @tool
 def generate_python_pptx_code(user_input: str) -> str:
+    """Generate python-pptx code given user input."""
     prompt = f"""You are an AI assistant specialized in creating PowerPoint presentations using the python-pptx library.
 Extract key insights and generate relevant charts based on the past conversation. 
 Finally, create a well-structured presentation that includes these charts and any necessary images, ensuring 
@@ -42,5 +43,9 @@ give the file a relevant name.
 
 
 def create_slides_generator_agent():
-    graph = create_react_agent(model, tools=[generate_python_pptx_code, python_repl_tool])
+    graph = create_react_agent(
+        model,
+        tools=[generate_python_pptx_code, python_repl_tool],
+        name="slides_generator_agent"
+    )
     return graph
