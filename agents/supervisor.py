@@ -31,7 +31,7 @@ def get_ai_data_scientist():
         )
     )
 
-    # Compile and run
+    # Compile
     app = workflow.compile(
         checkpointer=checkpointer,
         name="data_scientist"
