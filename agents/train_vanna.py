@@ -1,3 +1,4 @@
+import os
 import datetime
 
 from agents.data_analyst import DataAnalystVanna
@@ -24,5 +25,5 @@ def train(vn):
 
 if __name__ == "__main__":
     vn = DataAnalystVanna(config={"model": "gpt-4o-mini", "client": "persistent", "path": "./vanna-db"})
-    vn.connect_to_sqlite("../data/sales-and-customer-database.db")
+    vn.connect_to_sqlite(f"../{os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db")}")
     train(vn=vn)

@@ -1,3 +1,5 @@
+import os
+
 from vanna.openai import OpenAI_Chat
 from typing import (
     Annotated,
@@ -31,7 +33,7 @@ class DataAnalystVanna(ChromaDB_VectorStore, OpenAI_Chat):
 
 
 vn = DataAnalystVanna(config={"model": "gpt-4o-mini", "client": "persistent", "path": "./vanna-db"})
-vn.connect_to_sqlite("data/sales-and-customer-database.db")
+vn.connect_to_sqlite(os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db"))
 training_data = vn.get_training_data()
 print("training_data", training_data)
 

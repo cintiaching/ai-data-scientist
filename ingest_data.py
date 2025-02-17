@@ -15,7 +15,7 @@ path = kagglehub.dataset_download("dataceo/sales-and-customer-data")
 print("Path to dataset files:", path)
 
 # create a sqlite database
-db_name = "data/sales-and-customer-database.db"
+db_name = os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db")
 conn = sqlite3.connect(db_name)
 cursor = conn.cursor()
 
