@@ -28,9 +28,9 @@ graph TD
     supervisor -.-> coder_agent;
     supervisor -.-> data_analyst_agent;
     supervisor -.-> slides_generator_agent;
-    classDef default fill: #f2f0ff, line-height: 1.2
+    classDef default fill: #1e1e1e, color: #ffffff, line-height: 1.2
     classDef first fill-opacity: 0
-    classDef last fill: #bfb6fc
+    classDef last fill: #3f3f3f, color: #ffffff
 ```
 
 ## Usage
