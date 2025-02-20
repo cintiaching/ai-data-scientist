@@ -11,43 +11,10 @@ built using LangGraph and vanna.ai.
 
 The agents are managed by a supervisor to fulfill user requests, with short-term memory persistence.
 
-```mermaid
-%%{init: {'flowchart': {'curve': 'linear'}}}%%
-graph TD
-;
-    user([user])
-    supervisor(supervisor)
-    data_analyst_agent(data_analyst_agent)
-    coder_agent(coder_agent)
-    slides_generator_agent(slides_generator_agent)
-    user --> supervisor;
-    supervisor --> user;
-    coder_agent --> supervisor;
-    data_analyst_agent --> supervisor;
-    slides_generator_agent --> supervisor;
-    supervisor -.-> coder_agent;
-    supervisor -.-> data_analyst_agent;
-    supervisor -.-> slides_generator_agent;
-    classDef default fill: #1e1e1e, color: #ffffff, line-height: 1.2
-    classDef first fill-opacity: 0
-    classDef last fill: #3f3f3f, color: #ffffff
-```
+Visualizing the system:
 
-```mermaid
-%%{init: {'flowchart': {'curve': 'linear'}}}%%
-graph TD;
-	__start__([<p>__start__</p>]):::first
-	agent(agent)
-	tools(tools)
-	__end__([<p>__end__</p>]):::last
-	__start__ --> agent;
-	tools --> agent;
-	agent -.-> tools;
-	agent -.-> __end__;
-	classDef default fill:#f2f0ff,line-height:1.2
-	classDef first fill-opacity:0
-	classDef last fill:#bfb6fc
-```
+![AI Data Scientist System](./static/img/ai-data-scientist-graph.png)
+
 ## Usage
 
 ### Setup
