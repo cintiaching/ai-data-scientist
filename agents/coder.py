@@ -13,7 +13,7 @@ from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
 from agents.data_analyst import DataAnalystVanna
-from agents.llm import build_llm
+from agents.llm.llm import build_llm
 
 model = build_llm()
 

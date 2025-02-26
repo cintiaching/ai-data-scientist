@@ -16,7 +16,7 @@ def _build_deepseek() -> ChatDeepSeek:
         raise ValueError("DEEPSEEK_API_KEY is not set")
 
     return ChatDeepSeek(
-        model="deepseek-chat",
+        model=os.getenv("MODEL_NAME"),
         temperature=0,
         max_retries=2,
     )

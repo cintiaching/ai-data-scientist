@@ -17,7 +17,7 @@ def _build_azure_openai() -> AzureChatOpenAI:
     return AzureChatOpenAI(
         deployment_name=azure_openai_deployment_id,
         # model details used for tracing and token counting
-        model=os.getenv("AZURE_OPENAI_MODEL_NAME"),
+        model=os.getenv("MODEL_NAME"),
         model_version=os.getenv("OPENAI_API_VERSION"),
     )
 

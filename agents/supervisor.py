@@ -2,7 +2,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph_supervisor import create_supervisor
 
 from agents.coder import create_coder_agent
-from agents.llm import build_llm
+from agents.llm.llm import build_llm
 from agents.data_analyst import create_data_analyst_agent
 from agents.slides_generator import create_slides_generator_agent
 
