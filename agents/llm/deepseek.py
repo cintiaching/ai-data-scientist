@@ -9,6 +9,7 @@ load_dotenv(dotenv_path)
 
 
 def _build_deepseek() -> ChatDeepSeek:
+    """Initialize the DeepSeek chat model"""
     print("Initializing LLM: ChatDeepSeek")
 
     if (DEEPSEEK_API_KEY := os.getenv("DEEPSEEK_API_KEY")) is None:
@@ -22,6 +23,7 @@ def _build_deepseek() -> ChatDeepSeek:
 
 
 def get_deepseek_client():
+    """Set up llm client for vanna.ai"""
     if (DEEPSEEK_API_KEY := os.getenv("DEEPSEEK_API_KEY")) is None:
         raise ValueError("DEEPSEEK_API_KEY is not set")
     deepseek_client = OpenAI(
