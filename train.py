@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 from agents.data_analyst import DataAnalystVanna
 
@@ -17,12 +18,12 @@ def train(vn):
         documentation="Today's date is 2022-01-01")
     # At any time you can inspect what training data the package is able to reference
     training_data = vn.get_training_data()
-    print("training_data", training_data)
-
+    with pd.option_context("display.max_rows", None, "display.max_columns", None):
+        print("training_data: \n", training_data)
     print("Training is completed.")
 
 
 if __name__ == "__main__":
-    vn = DataAnalystVanna(config={"model": "gpt-4o-mini", "client": "persistent", "path": "./vanna-db"})
+    vn = DataAnalystVanna(config={"model": os.getenv("MODEL_NAME"), "client": "persistent", "path": "./vanna-db"})
     vn.connect_to_sqlite(f"{os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db")}")
     train(vn=vn)
