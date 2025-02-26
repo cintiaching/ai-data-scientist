@@ -51,14 +51,21 @@ def answer_question_about_data(user_input: str) -> dict:
     :param user_input: (str) the question user ask
     :return: (dict) a dictionary containing the sql, execution_result, answer
     """
-    sql = vn.generate_sql(user_input)
-    sql_result = vn.run_sql(sql)
-    answer = vn.generate_summary(user_input, sql_result)
-    return {
-        "sql": sql,
-        "execution_result": str(sql_result),
-        "answer": answer
-    }
+    try:
+        sql = vn.generate_sql(user_input, allow_llm_to_see_data=True)
+        sql_result = vn.run_sql(sql)
+        answer = vn.generate_summary(user_input, sql_result)
+        return {
+            "sql": sql,
+            "execution_result": str(sql_result),
+            "answer": answer,
+        }
+    except Exception as e:
+        return {
+            "sql": None,
+            "execution_result": None,
+            "answer": str(e),
+        }
 
 
 @tool
@@ -69,17 +76,25 @@ def visualize_data(user_input: str) -> dict:
     :param user_input: (str) the question user ask
     :return: (dict) a dictionary containing the sql, execution_result, plotly_code, and plotly_figure
     """
-    sql = vn.generate_sql(user_input)
-    df = vn.run_sql(sql)
-    plotly_code = vn.generate_plotly_code(question=user_input, sql=sql,
-                                          df_metadata=f"Running df.dtypes gives:\n {df.dtypes}")
-    fig = vn.get_plotly_figure(plotly_code=plotly_code, df=df)
-    return {
-        "sql": sql,
-        "execution_result": str(df),
-        "plotly_code": plotly_code,
-        "plotly_figure": fig
-    }
+    try:
+        sql = vn.generate_sql(user_input)
+        df = vn.run_sql(sql)
+        plotly_code = vn.generate_plotly_code(question=user_input, sql=sql,
+                                              df_metadata=f"Running df.dtypes gives:\n {df.dtypes}")
+        fig = vn.get_plotly_figure(plotly_code=plotly_code, df=df)
+        return {
+            "sql": sql,
+            "execution_result": str(df),
+            "plotly_code": plotly_code,
+            "plotly_figure": fig
+        }
+    except Exception as e:
+        return {
+            "sql": None,
+            "execution_result": str(e),
+            "plotly_code": None,
+            "plotly_figure": None
+        }
 
 
 tools = [answer_question_about_data, visualize_data]
