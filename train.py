@@ -1,5 +1,4 @@
 import os
-import datetime
 
 from agents.data_analyst import DataAnalystVanna
 
@@ -15,7 +14,7 @@ def train(vn):
     vn.train(
         documentation="The invoice_date of sales_data is in dd-MM-yyyy format")
     vn.train(
-        documentation="Today's date is {}".format(datetime.date.today()))
+        documentation="Today's date is 2022-01-01")
     # At any time you can inspect what training data the package is able to reference
     training_data = vn.get_training_data()
     print("training_data", training_data)
