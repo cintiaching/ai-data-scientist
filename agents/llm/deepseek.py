@@ -17,8 +17,7 @@ def _build_deepseek() -> ChatDeepSeek:
 
     return ChatDeepSeek(
         model=os.getenv("MODEL_NAME"),
-        temperature=0,
-        max_retries=2,
+        model_kwargs={"parallel_tool_calls": False}
     )
 
 

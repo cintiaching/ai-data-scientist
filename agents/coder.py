@@ -80,7 +80,9 @@ The tables within the database:
 2. If the provided context is insufficient, please explain why it can't be generated.
 3. Please use the most relevant table(s). 
 4. Ensure that the output python is executable, and free of syntax errors.
-5. Do not print out raw data, or very long output.
+5. Use print to show any result, e.g. model prediction.
+6. You are not allowed to use the python-pptx module to create slides, response with "my role doesnt allow powerpoint 
+creation, please use the slides_generator_agent" and return code=''.
     """
     code_gen_prompt = ChatPromptTemplate.from_messages(
         [
@@ -98,7 +100,7 @@ The tables within the database:
 
 
 tools = [python_repl_tool, generate_python_code]
-model = model.bind_tools(tools)
+model = model.bind_tools(tools, parallel_tool_calls=False)
 
 tools_by_name = {tool.name: tool for tool in tools}
 

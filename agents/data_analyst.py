@@ -86,7 +86,7 @@ def visualize_data(user_input: str) -> dict:
             "sql": sql,
             "execution_result": str(df),
             "plotly_code": plotly_code,
-            "plotly_figure": fig
+            "plotly_figure": fig.to_dict()
         }
     except Exception as e:
         return {
@@ -99,7 +99,7 @@ def visualize_data(user_input: str) -> dict:
 
 tools = [answer_question_about_data, visualize_data]
 model = build_llm()
-model = model.bind_tools(tools)
+model = model.bind_tools(tools, parallel_tool_calls=False)
 
 tools_by_name = {tool.name: tool for tool in tools}
 
