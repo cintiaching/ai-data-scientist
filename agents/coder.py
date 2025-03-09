@@ -100,7 +100,7 @@ creation, please use the slides_generator_agent" and return code=''.
 
 
 tools = [python_repl_tool, generate_python_code]
-model = model.bind_tools(tools, parallel_tool_calls=False)
+model = model.bind_tools(tools)
 
 tools_by_name = {tool.name: tool for tool in tools}
 

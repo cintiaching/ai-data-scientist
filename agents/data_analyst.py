@@ -99,7 +99,7 @@ def visualize_data(user_input: str) -> dict:
 
 tools = [answer_question_about_data, visualize_data]
 model = build_llm()
-model = model.bind_tools(tools, parallel_tool_calls=False)
+model = model.bind_tools(tools)
 
 tools_by_name = {tool.name: tool for tool in tools}
 
