@@ -10,6 +10,7 @@ dependencies = [
     "kaleido==0.2.1",
     "langchain-deepseek>=0.1.2",
     "langchain-experimental>=0.3.4",
+    "langchain-huggingface>=0.1.2",
     "langchain-openai>=0.3.5",
     "langgraph>=0.2.71",
     "langgraph-supervisor>=0.0.2",
