@@ -1,17 +1,15 @@
 import os
-from typing import Annotated, Sequence, TypedDict
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
-from langgraph.graph import add_messages
 
 from agents.agent import Agent
 from agents.coder import python_repl_tool, Code
 
 output_dir = os.getenv("OUTPUT_DIRECTORY", ".")
 os.makedirs(output_dir, exist_ok=True)
+
 
 class SlideGeneratorAgent(Agent):
     """Agent that code"""

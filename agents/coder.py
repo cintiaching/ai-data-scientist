@@ -1,12 +1,10 @@
 import os
-from typing import Annotated, TypedDict, Sequence
+from typing import Annotated
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
 from langchain_experimental.utilities import PythonREPL
-from langchain_core.messages import BaseMessage
-from langgraph.graph.message import add_messages
 
 from pydantic import BaseModel, Field
 
@@ -41,6 +39,7 @@ def python_repl_tool(
 
 class CoderAgent(Agent):
     """Agent that code"""
+
     def __init__(self, vanna: DataAnalystVanna, model: BaseChatModel):
         system_prompt = """You are a coder agent, please use generate_python_code tool to generate code given user's intent.
 And then use python_repl_tool to execute your code, and then return your result."""
