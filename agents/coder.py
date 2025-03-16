@@ -28,6 +28,22 @@ class Code(BaseModel):
     code: str = Field(description="Code block")
 
 
+@tool
+def python_repl_tool(
+        code: Annotated[str, "the python code to execute."],
+):
+    """Use this to execute python code. If you want to see the output of a value,
+    you should print it out with `print(...)`. This is visible to the user."""
+    try:
+        result = repl.run(code)
+        print("code.code", code)
+        print("code execution result", result)
+    except BaseException as e:
+        return f"Failed to execute. Error: {repr(e)}"
+    result_str = f"Successfully executed:\n```python\n{code}\n```\nStdout: {result}"
+    return result_str
+
+
 class CoderAgent(Agent):
     """Agent that code"""
     def __init__(self, vanna: DataAnalystVanna, model: BaseChatModel):
@@ -38,22 +54,6 @@ And then use python_repl_tool to execute your code, and then return your result.
 
         super().__init__(model, agent_name, AgentState, system_prompt)
         self.vanna = vanna
-
-    @staticmethod
-    @tool
-    def python_repl_tool(
-            code: Annotated[str, "the python code to execute."],
-    ):
-        """Use this to execute python code. If you want to see the output of a value,
-        you should print it out with `print(...)`. This is visible to the user."""
-        try:
-            result = repl.run(code)
-            print("code.code", code)
-            print("code execution result", result)
-        except BaseException as e:
-            return f"Failed to execute. Error: {repr(e)}"
-        result_str = f"Successfully executed:\n```python\n{code}\n```\nStdout: {result}"
-        return result_str
 
     @tool
     def generate_python_code(self, user_input: str) -> str:
@@ -103,7 +103,7 @@ creation, please use the slides_generator_agent" and return code=''.
         return result.code
 
     def get_tools_by_name(self):
-        tools = [self.python_repl_tool, self.generate_python_code]
+        tools = [python_repl_tool, self.generate_python_code]
         self.model = self.model.bind_tools(tools)
         tools_by_name = {tool.name: tool for tool in tools}
         return tools_by_name
