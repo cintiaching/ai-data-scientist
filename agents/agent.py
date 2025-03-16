@@ -1,16 +1,21 @@
 import json
 from abc import ABC, abstractmethod
+from typing import TypedDict, Annotated, Sequence
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import ToolMessage, SystemMessage
-from langgraph.graph import StateGraph, END
+from langchain_core.messages import ToolMessage, SystemMessage, BaseMessage
+from langgraph.graph import StateGraph, END, add_messages
+
+
+class State(TypedDict):
+    """The state of the agent."""
+    messages: Annotated[Sequence[BaseMessage], add_messages]
 
 
 class Agent(ABC):
-    def __init__(self, model: BaseChatModel, agent_name: str, AgentState, system_prompt: str = None):
+    def __init__(self, model: BaseChatModel, agent_name: str, system_prompt: str = None):
         self.model = model
         self.agent_name = agent_name
-        self.AgentState = AgentState
         self.system_prompt = system_prompt
 
     @abstractmethod
@@ -49,7 +54,7 @@ class Agent(ABC):
             return "continue"
 
     def create_agent(self):
-        workflow = StateGraph(self.AgentState)
+        workflow = StateGraph(State)
         workflow.add_node("agent", self.call_model)
         workflow.add_node("tools", self.tool_node)
         workflow.set_entry_point("agent")

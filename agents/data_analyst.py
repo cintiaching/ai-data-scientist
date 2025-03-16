@@ -1,13 +1,6 @@
 from langchain_core.language_models import BaseChatModel
 from vanna.openai import OpenAI_Chat
-from typing import (
-    Annotated,
-    Sequence,
-    TypedDict,
-)
 from langchain_core.tools import tool
-from langchain_core.messages import BaseMessage
-from langgraph.graph.message import add_messages
 
 from vanna.chromadb import ChromaDB_VectorStore
 
@@ -23,11 +16,6 @@ class DataAnalystVanna(ChromaDB_VectorStore, OpenAI_Chat):
         OpenAI_Chat.__init__(self, client=client, config=config)
 
 
-class DataAnalysisState(TypedDict):
-    """The state of the agent."""
-    messages: Annotated[Sequence[BaseMessage], add_messages]
-
-
 class DataAnalystAgent(Agent):
     """Agent that does data analysis using vanna"""
     def __init__(self, vanna: DataAnalystVanna, model: BaseChatModel):
@@ -35,9 +23,8 @@ class DataAnalystAgent(Agent):
         "For data analysis task / inquiry about the, use answer_question_about_data. "
         "For data visualization task, use visualize_data"
         agent_name = "data_analyst_agent"
-        AgentState = DataAnalysisState
 
-        super().__init__(model, agent_name, AgentState, system_prompt)
+        super().__init__(model, agent_name, system_prompt)
         self.vanna = vanna
 
     @tool

@@ -17,11 +17,6 @@ from agents.data_analyst import DataAnalystVanna
 repl = PythonREPL()
 
 
-class CoderState(TypedDict):
-    """The state of the agent."""
-    messages: Annotated[Sequence[BaseMessage], add_messages]
-
-
 class Code(BaseModel):
     """Schema for code solutions to questions about python."""
     prefix: str = Field(description="Description of the problem and approach")
@@ -50,9 +45,8 @@ class CoderAgent(Agent):
         system_prompt = """You are a coder agent, please use generate_python_code tool to generate code given user's intent.
 And then use python_repl_tool to execute your code, and then return your result."""
         agent_name = "coder_agent"
-        AgentState = CoderState
 
-        super().__init__(model, agent_name, AgentState, system_prompt)
+        super().__init__(model, agent_name, system_prompt)
         self.vanna = vanna
 
     @tool

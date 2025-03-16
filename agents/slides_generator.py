@@ -13,12 +13,6 @@ from agents.coder import python_repl_tool, Code
 output_dir = os.getenv("OUTPUT_DIRECTORY", ".")
 os.makedirs(output_dir, exist_ok=True)
 
-
-class SlidesGeneratorState(TypedDict):
-    """The state of the agent."""
-    messages: Annotated[Sequence[BaseMessage], add_messages]
-
-
 class SlideGeneratorAgent(Agent):
     """Agent that code"""
 
@@ -28,8 +22,7 @@ class SlideGeneratorAgent(Agent):
         "And then use python_repl_tool to execute your code."
         f"Save the presentation in pptx format in {output_dir} directory."
         agent_name = "slides_generator_agent"
-        AgentState = SlidesGeneratorState
-        super().__init__(model, agent_name, AgentState, system_prompt)
+        super().__init__(model, agent_name, system_prompt)
 
     @tool
     def generate_python_pptx_code(self, user_input: str) -> str:
