@@ -1,27 +1,20 @@
-import json
 import os
 from typing import Annotated, TypedDict, Sequence
 
+from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langchain_experimental.utilities import PythonREPL
-from langchain_core.messages import BaseMessage, ToolMessage, SystemMessage
-from langgraph.graph import StateGraph, END
+from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 
 from pydantic import BaseModel, Field
 
+from agents.agent import Agent
 from agents.data_analyst import DataAnalystVanna
-from agents.llm.llm import build_llm
-
-model = build_llm()
 
 # This executes code locally, which can be unsafe
 repl = PythonREPL()
-
-vn = DataAnalystVanna(config={"model": "gpt-4o-mini", "client": "persistent", "path": "./vanna-db"})
-vn.connect_to_sqlite(os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db"))
 
 
 class CoderState(TypedDict):
@@ -35,29 +28,40 @@ class Code(BaseModel):
     code: str = Field(description="Code block")
 
 
-@tool
-def python_repl_tool(
-        code: Annotated[str, "the python code to execute."],
-):
-    """Use this to execute python code. If you want to see the output of a value,
-    you should print it out with `print(...)`. This is visible to the user."""
-    try:
-        result = repl.run(code)
-        print("code.code", code)
-        print("code execution result", result)
-    except BaseException as e:
-        return f"Failed to execute. Error: {repr(e)}"
-    result_str = f"Successfully executed:\n```python\n{code}\n```\nStdout: {result}"
-    return result_str
+class CoderAgent(Agent):
+    """Agent that code"""
+    def __init__(self, vanna: DataAnalystVanna, model: BaseChatModel):
+        system_prompt = """You are a coder agent, please use generate_python_code tool to generate code given user's intent.
+And then use python_repl_tool to execute your code, and then return your result."""
+        agent_name = "coder_agent"
+        AgentState = CoderState
 
+        super().__init__(model, agent_name, AgentState, system_prompt)
+        self.vanna = vanna
 
-@tool
-def generate_python_code(user_input: str) -> str:
-    """Generate python code given user input."""
-    ddl_list = vn.get_related_ddl(user_input)
-    doc_list = vn.get_related_documentation(user_input)
+    @staticmethod
+    @tool
+    def python_repl_tool(
+            code: Annotated[str, "the python code to execute."],
+    ):
+        """Use this to execute python code. If you want to see the output of a value,
+        you should print it out with `print(...)`. This is visible to the user."""
+        try:
+            result = repl.run(code)
+            print("code.code", code)
+            print("code execution result", result)
+        except BaseException as e:
+            return f"Failed to execute. Error: {repr(e)}"
+        result_str = f"Successfully executed:\n```python\n{code}\n```\nStdout: {result}"
+        return result_str
 
-    system_prompt = f"""You are a python expert. Please help to generate a code to answer the question. 
+    @tool
+    def generate_python_code(self, user_input: str) -> str:
+        """Generate python code given user input."""
+        ddl_list = self.vanna.get_related_ddl(user_input)
+        doc_list = self.vanna.get_related_documentation(user_input)
+
+        system_prompt = f"""You are a python expert. Please help to generate a code to answer the question. 
 Your response should ONLY be based on the given context and follow the response guidelines and format instructions. 
 You can access to SQLite database if you need to, connect using
 ```python
@@ -84,81 +88,22 @@ The tables within the database:
 6. You are not allowed to use the python-pptx module to create slides, response with "my role doesnt allow powerpoint 
 creation, please use the slides_generator_agent" and return code=''.
     """
-    code_gen_prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                system_prompt + "Here is the user question:",
-            ),
-            ("placeholder", "{messages}"),
-        ]
-    )
-    code_gen_chain = code_gen_prompt | model.with_structured_output(Code)
-    result = code_gen_chain.invoke({"messages": [("user", user_input)]})
-    print("code generation result", result)
-    return result.code
-
-
-tools = [python_repl_tool, generate_python_code]
-model = model.bind_tools(tools)
-
-tools_by_name = {tool.name: tool for tool in tools}
-
-
-def tool_node(state: CoderState):
-    outputs = []
-    for tool_call in state["messages"][-1].tool_calls:
-        tool_result = tools_by_name[tool_call["name"]].invoke(tool_call["args"])
-        outputs.append(
-            ToolMessage(
-                content=json.dumps(tool_result),
-                name=tool_call["name"],
-                tool_call_id=tool_call["id"],
-            )
+        code_gen_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    system_prompt + "Here is the user question:",
+                ),
+                ("placeholder", "{messages}"),
+            ]
         )
-    return {"messages": outputs}
+        code_gen_chain = code_gen_prompt | self.model.with_structured_output(Code)
+        result = code_gen_chain.invoke({"messages": [("user", user_input)]})
+        print("code generation result", result)
+        return result.code
 
-
-def call_model(
-        state: CoderState,
-        config: RunnableConfig,
-):
-    system_prompt = SystemMessage(
-        "You are a coder agent, please use generate_python_code tool to generate code given user's intent"
-        "And then use python_repl_tool to execute your code, and then return your result."
-    )
-    response = model.invoke([system_prompt] + state["messages"], config)
-    # We return a list, because this will get added to the existing list
-    return {"messages": [response]}
-
-
-# Define the conditional edge that determines whether to continue or not
-def should_continue(state: CoderState):
-    messages = state["messages"]
-    last_message = messages[-1]
-    # If there is no function call, then we finish
-    if not last_message.tool_calls:
-        return "end"
-    # Otherwise if there is, we continue
-    else:
-        return "continue"
-
-
-def create_coder_agent():
-    workflow = StateGraph(CoderState)
-    workflow.add_node("agent", call_model)
-    workflow.add_node("tools", tool_node)
-    workflow.set_entry_point("agent")
-    workflow.add_conditional_edges(
-        "agent",
-        should_continue,
-        {
-            # If `tools`, then we call the tool node.
-            "continue": "tools",
-            # Otherwise we finish.
-            "end": END,
-        },
-    )
-    workflow.add_edge("tools", "agent")
-    graph = workflow.compile(name="coder_agent")
-    return graph
+    def get_tools_by_name(self):
+        tools = [self.python_repl_tool, self.generate_python_code]
+        self.model = self.model.bind_tools(tools)
+        tools_by_name = {tool.name: tool for tool in tools}
+        return tools_by_name

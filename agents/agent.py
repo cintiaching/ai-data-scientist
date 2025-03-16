@@ -1,18 +1,17 @@
 import json
 from abc import ABC, abstractmethod
-from tkinter import END
-from typing import TypedDict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import ToolMessage, SystemMessage
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, END
 
 
 class Agent(ABC):
-    def __init__(self, model: BaseChatModel, agent_name: str, AgentState):
+    def __init__(self, model: BaseChatModel, agent_name: str, AgentState, system_prompt: str = None):
         self.model = model
         self.agent_name = agent_name
         self.AgentState = AgentState
+        self.system_prompt = system_prompt
 
     @abstractmethod
     def get_tools_by_name(self):
@@ -33,10 +32,7 @@ class Agent(ABC):
         return {"messages": outputs}
 
     def call_model(self, state):
-        system_prompt = SystemMessage(
-            "You are a coder agent, please use generate_python_code tool to generate code given user's intent"
-            "And then use python_repl_tool to execute your code, and then return your result."
-        )
+        system_prompt = SystemMessage(self.system_prompt)
         response = self.model.invoke([system_prompt] + state["messages"])
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
@@ -69,4 +65,5 @@ class Agent(ABC):
         )
         workflow.add_edge("tools", "agent")
         graph = workflow.compile(name=self.agent_name)
+        graph.get_graph().draw_mermaid()
         return graph
