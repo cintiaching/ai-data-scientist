@@ -28,4 +28,5 @@ def get_llm_client():
         return get_deepseek_client()
     if llm_type == "mistral":
         return get_mistral_client()
-    raise ValueError(f"Unknown LLM type: {llm_type}. Only 'azure_openai' and 'deepseek' are currently supported.")
+    raise ValueError(
+        f"Unknown LLM type: {llm_type}. Only 'azure_openai', 'deepseek' and 'mistral' are currently supported.")
