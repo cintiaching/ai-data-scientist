@@ -1,21 +1,26 @@
+import os
+
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph_supervisor import create_supervisor
 
-from agents.coder import create_coder_agent
+from agents.coder import CoderAgent
 from agents.llm.llm import build_llm
-from agents.data_analyst import create_data_analyst_agent
-from agents.slides_generator import create_slides_generator_agent
+from agents.data_analyst import DataAnalystAgent, DataAnalystVanna
+from agents.slides_generator import SlideGeneratorAgent
 
 
 def get_ai_data_scientist():
     model = build_llm()
+    vn = DataAnalystVanna(config={"model": os.getenv("MODEL_NAME"), "client": "persistent", "path": "./vanna-db"})
+    vn.connect_to_sqlite(os.getenv("SQLITE_DATABASE_NAME", "data/sales-and-customer-database.db"))
+
     # persistence
     checkpointer = InMemorySaver()
 
     # agents
-    data_analyst_agent = create_data_analyst_agent()
-    coder_agent = create_coder_agent()
-    slides_generator_agent = create_slides_generator_agent()
+    data_analyst_agent = DataAnalystAgent(vn, model).create_agent()
+    coder_agent = CoderAgent(vn, model).create_agent()
+    slides_generator_agent = SlideGeneratorAgent(model).create_agent()
 
     # Create supervisor workflow
     workflow = create_supervisor(
